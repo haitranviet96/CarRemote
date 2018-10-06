@@ -5,4 +5,6 @@ public interface BaseController {
     void rightSignal(boolean status);
     void light(boolean value);
     void openDoor(boolean status);
+
+    void setEngineStatus(boolean status);
 }

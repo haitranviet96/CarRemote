@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 
-<BorderPane id="pane" prefHeight="870.0" prefWidth="1920.0" stylesheets="@style.css" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="haitran.controllers.ControllerImpl">
+<BorderPane id="pane" prefHeight="580.0" prefWidth="1280.0" stylesheets="@style.css" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="haitran.controllers.ControllerImpl">
     <top>
         <AnchorPane BorderPane.alignment="CENTER">
             <children>
@@ -30,7 +30,7 @@
     </left>
     <bottom>
         <AnchorPane BorderPane.alignment="CENTER">
-            <Button id="engineButton" fx:id="engineButton" layoutX="1762.0" maxHeight="144" maxWidth="144" minHeight="144" minWidth="144" mnemonicParsing="false" onAction="#onEngineStatusChange" BorderPane.alignment="CENTER" />
+            <Button id="engineButton" fx:id="engineButton" layoutX="1184.0" layoutY="-2.0" maxHeight="96" maxWidth="96" minHeight="96" minWidth="96" mnemonicParsing="false" onAction="#onEngineButtonPress" BorderPane.alignment="CENTER" />
         </AnchorPane>
     </bottom>
 </BorderPane>

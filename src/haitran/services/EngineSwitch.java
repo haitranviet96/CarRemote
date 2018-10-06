@@ -1,19 +1,19 @@
 package haitran.services;
 
+import haitran.Constants;
 import org.fourthline.cling.binding.annotations.*;
-import raijin.audio_system.Constants;
 
 import java.beans.PropertyChangeSupport;
 
 @UpnpService(
-        serviceId = @UpnpServiceId(Constants.SWITCH_POWER),
-        serviceType = @UpnpServiceType(value = Constants.SWITCH_POWER, version = 1)
+        serviceId = @UpnpServiceId(Constants.ENGINE_SWITCH),
+        serviceType = @UpnpServiceType(value = Constants.ENGINE_SWITCH, version = 1)
 )
-public class SwitchPower {
+public class EngineSwitch {
 
     private final PropertyChangeSupport propertyChangeSupport;
 
-    public SwitchPower() {
+    public EngineSwitch() {
         this.propertyChangeSupport = new PropertyChangeSupport(this);
     }
 
