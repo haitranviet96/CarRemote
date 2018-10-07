@@ -191,17 +191,17 @@ public class ControllerImpl implements BaseController {
                 if (values.containsKey(Constants.LEFT_SIGNAL)) {
                     boolean value = (boolean) values.get(Constants.LEFT_SIGNAL).getValue();
                     changeLeftSignal(value);
-                    System.out.println("New value: " + value);
+                    System.out.println("New value: " + LEFT_SIGNAL_STATUS);
                 }
                 if (values.containsKey(Constants.RIGHT_SIGNAL)) {
                     boolean value = (boolean) values.get(Constants.RIGHT_SIGNAL).getValue();
                     changeRightSignal(value);
-                    System.out.println("New value: " + value);
+                    System.out.println("New value: " + RIGHT_SIGNAL_STATUS);
                 }
                 if (values.containsKey(Constants.HEAD_LIGHT)) {
                     boolean value = (boolean) values.get(Constants.HEAD_LIGHT).getValue();
                     changeHeadLightSignal(value);
-                    System.out.println("New value: " + value);
+                    System.out.println("New value: " + HEAD_LIGHT_SIGNAL_STATUS);
                 }
             }
 
@@ -216,6 +216,11 @@ public class ControllerImpl implements BaseController {
     private void changeEngineButton(boolean newStatus) {
         if (engineButton != null && newStatus != ENGINE_STATUS) {
             // change to engine button style
+            if (!newStatus) {
+                if (LEFT_SIGNAL_STATUS) onChangeLeftSignal();
+                if (RIGHT_SIGNAL_STATUS) onChangeRightSignal();
+                if (HEAD_LIGHT_SIGNAL_STATUS) onChangeHeadLight();
+            }
             ENGINE_STATUS = newStatus;
             engineButton.setStyle("-fx-background-image: url('" +
                     (ENGINE_STATUS ? getClass().getResource("../../resources/stop.png").toExternalForm() :
@@ -226,7 +231,7 @@ public class ControllerImpl implements BaseController {
     private void changeLeftSignal(boolean newStatus) {
         if (leftSignal != null && newStatus != LEFT_SIGNAL_STATUS) {
             // change to engine button style
-            LEFT_SIGNAL_STATUS = newStatus;
+            LEFT_SIGNAL_STATUS = ENGINE_STATUS && newStatus;
             leftSignal.setOpacity(LEFT_SIGNAL_STATUS ? 1.0 : 0.0);
         }
     }
@@ -234,7 +239,7 @@ public class ControllerImpl implements BaseController {
     private void changeRightSignal(boolean newStatus) {
         if (rightSignal != null && newStatus != RIGHT_SIGNAL_STATUS) {
             // change to engine button style
-            RIGHT_SIGNAL_STATUS = newStatus;
+            RIGHT_SIGNAL_STATUS = ENGINE_STATUS && newStatus;
             rightSignal.setOpacity(RIGHT_SIGNAL_STATUS ? 1.0 : 0.0);
         }
     }
@@ -242,62 +247,45 @@ public class ControllerImpl implements BaseController {
     private void changeHeadLightSignal(boolean newStatus) {
         if (headLight != null && newStatus != HEAD_LIGHT_SIGNAL_STATUS) {
             // change to engine button style
-            HEAD_LIGHT_SIGNAL_STATUS = newStatus;
+            HEAD_LIGHT_SIGNAL_STATUS = ENGINE_STATUS && newStatus;
             headLight.setOpacity(HEAD_LIGHT_SIGNAL_STATUS ? 1.0 : 0.0);
         }
     }
 
-    // link methods of view
-    @FXML
-    private void onEngineButtonPress(Event event) {
-        setEngineStatus(!ENGINE_STATUS);
-    }
-
-    @FXML
-    private void onLeftSignalPress(Event event) {
-        leftSignal(!LEFT_SIGNAL_STATUS);
-    }
-
-    @FXML
-    private void onRightSignalPress(Event event) {
-        rightSignal(!RIGHT_SIGNAL_STATUS);
-    }
-
-    @FXML
-    private void onHeadLightPress(Event event) {
-        light(!HEAD_LIGHT_SIGNAL_STATUS);
-    }
-
     // controller method
     @Override
-    public void setEngineStatus(boolean status) {
+    @FXML
+    public void onChangeEngineStatus() {
         Service service = getServiceById(device, Constants.ENGINE_SWITCH);
         if (service != null) {
-            executeAction(upnpService, new SetEngineStatus(service, status));
+            executeAction(upnpService, new SetEngineStatus(service, !ENGINE_STATUS));
         }
     }
 
     @Override
-    public void leftSignal(boolean status) {
+    @FXML
+    public void onChangeLeftSignal() {
         Service service = getServiceById(device, Constants.LIGHT_SWITCH);
         if (service != null) {
-            executeAction(upnpService, new SetLeftSignal(service, status));
+            executeAction(upnpService, new SetLeftSignal(service, !LEFT_SIGNAL_STATUS));
         }
     }
 
     @Override
-    public void rightSignal(boolean status) {
+    @FXML
+    public void onChangeRightSignal() {
         Service service = getServiceById(device, Constants.LIGHT_SWITCH);
         if (service != null) {
-            executeAction(upnpService, new SetRightSignal(service, status));
+            executeAction(upnpService, new SetRightSignal(service, !RIGHT_SIGNAL_STATUS));
         }
     }
 
     @Override
-    public void light(boolean status) {
+    @FXML
+    public void onChangeHeadLight() {
         Service service = getServiceById(device, Constants.LIGHT_SWITCH);
         if (service != null) {
-            executeAction(upnpService, new SetHeadLight(service, status));
+            executeAction(upnpService, new SetHeadLight(service, !HEAD_LIGHT_SIGNAL_STATUS));
         }
     }
 
