@@ -1,36 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 
-<BorderPane id="pane" prefHeight="580.0" prefWidth="1280.0" stylesheets="@style.css" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="haitran.controllers.ControllerImpl">
-    <top>
-        <AnchorPane BorderPane.alignment="CENTER">
-            <children>
-                <ImageView id="left_signal" fitHeight="150.0" fitWidth="200.0" layoutX="130.0" layoutY="25.0" pickOnBounds="true" preserveRatio="true" />
-                <ImageView id="right_signal" fitHeight="150.0" fitWidth="200.0" layoutX="363.0" layoutY="14.0" pickOnBounds="true" preserveRatio="true" />
-                <ImageView id="door_opening" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" />
-            </children>
-        </AnchorPane>
-    </top>
-    <center>
-        <AnchorPane BorderPane.alignment="CENTER" />
-    </center>
-    <right>
-        <AnchorPane BorderPane.alignment="CENTER" />
-    </right>
-    <left>
-        <AnchorPane BorderPane.alignment="CENTER">
-            <children>
-                <ImageView fitHeight="150.0" fitWidth="200.0" layoutY="14.0" pickOnBounds="true" preserveRatio="true" />
-            </children>
-        </AnchorPane>
-    </left>
-    <bottom>
-        <AnchorPane BorderPane.alignment="CENTER">
-            <Button id="engineButton" fx:id="engineButton" layoutX="1184.0" layoutY="-2.0" maxHeight="96" maxWidth="96" minHeight="96" minWidth="96" mnemonicParsing="false" onAction="#onEngineButtonPress" BorderPane.alignment="CENTER" />
-        </AnchorPane>
-    </bottom>
-</BorderPane>
+<AnchorPane id="pane" prefHeight="580.0" prefWidth="1280.0" stylesheets="@style.css" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="haitran.controllers.ControllerImpl">
+    <children>
+        <Button id="engineButton" fx:id="engineButton" layoutX="1177.0" layoutY="477.0" maxHeight="96" maxWidth="96" minHeight="96" minWidth="96" mnemonicParsing="false" onAction="#onEngineButtonPress" BorderPane.alignment="CENTER" />
+        <ImageView fx:id="leftSignal" layoutX="482.0" layoutY="100.0" onMouseClicked="#onLeftSignalPress" pickOnBounds="true" preserveRatio="true" opacity="0.0">
+         <image>
+            <Image url="@leftSignal.png" />
+         </image></ImageView>
+        <ImageView fx:id="rightSignal" layoutX="789.0" layoutY="100.0" onMouseClicked="#onRightSignalPress" pickOnBounds="true" preserveRatio="true" opacity="0.0">
+         <image>
+            <Image url="@rightSignal.png" />
+         </image></ImageView>
+      <ImageView fx:id="headLight" layoutX="838.0" layoutY="72.0" onMouseClicked="#onHeadLightPress" pickOnBounds="true" preserveRatio="true" opacity="0.0">
+         <image>
+            <Image url="@Headlight.png" />
+         </image>
+      </ImageView>
+    </children>
+</AnchorPane>
