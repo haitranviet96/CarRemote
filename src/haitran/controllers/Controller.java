@@ -20,6 +20,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.media.AudioClip;
 import org.fourthline.cling.UpnpService;
 import org.fourthline.cling.UpnpServiceImpl;
 import org.fourthline.cling.binding.LocalServiceBindingException;
@@ -38,7 +39,7 @@ import org.fourthline.cling.registry.RegistryListener;
 
 import java.io.IOException;
 
-public class ControllerImpl implements BaseController {
+public class Controller implements BaseController {
     @FXML
     private Button engineButton;
     @FXML
@@ -47,6 +48,10 @@ public class ControllerImpl implements BaseController {
     private ImageView rightSignal;
     @FXML
     private ImageView headLight;
+    @FXML
+    private ImageView lightButton;
+    @FXML
+    private ImageView musicButton;
     @FXML
     private ImageView leftDoor;
     @FXML
@@ -57,6 +62,7 @@ public class ControllerImpl implements BaseController {
     private ImageView hood;
 
     private Car car = Car.getInstace();
+    private AudioClip startEngineSound = new AudioClip(getClass().getResource("/resources/car_engine_sound.wav").toExternalForm());
     private UpnpService upnpService;
     private RegistryListener registryListener = new DefaultRegistryListener() {
         @Override
@@ -67,13 +73,13 @@ public class ControllerImpl implements BaseController {
                 car.setDevice(localDevice);
                 upnpService.getControlPoint().execute(
                         new EngineSwitchSubscriptionCallback(getServiceById(car, Constants.ENGINE_SWITCH),
-                                Integer.MAX_VALUE, ControllerImpl.this));
+                                Integer.MAX_VALUE, Controller.this));
                 upnpService.getControlPoint().execute(
                         new LightSwitchSubscriptionCallback(getServiceById(car, Constants.LIGHT_SWITCH),
-                                Integer.MAX_VALUE, ControllerImpl.this));
+                                Integer.MAX_VALUE, Controller.this));
                 upnpService.getControlPoint().execute(
                         new DoorSwitchSubscriptionCallback(getServiceById(car, Constants.DOOR_SWITCH),
-                                Integer.MAX_VALUE, ControllerImpl.this));
+                                Integer.MAX_VALUE, Controller.this));
             }
         }
 
@@ -86,7 +92,7 @@ public class ControllerImpl implements BaseController {
         }
     };
 
-    public ControllerImpl() throws Exception {
+    public Controller() throws Exception {
         initialize();
     }
 
@@ -144,8 +150,11 @@ public class ControllerImpl implements BaseController {
             }
             car.setEngineStatus(newStatus);
             engineButton.setStyle("-fx-background-image: url('" +
-                    (car.getEngineStatus() ? getClass().getResource("../../resources/stop.png").toExternalForm() :
-                            getClass().getResource("../../resources/start.png").toExternalForm()) + "')");
+                    (car.getEngineStatus() ? getClass().getResource("/resources/stop.png").toExternalForm() :
+                            getClass().getResource("/resources/start.png").toExternalForm()) + "')");
+            if(car.getEngineStatus()){
+                startEngineSound.play();
+            }
         }
     }
 
@@ -153,7 +162,7 @@ public class ControllerImpl implements BaseController {
     public void changeLeftSignal(boolean newStatus) {
         if (leftSignal != null && newStatus != car.getLeftSignalStatus()) {
             car.setLeftSignalStatus(car.getEngineStatus() && newStatus);
-            leftSignal.setOpacity(car.getLeftSignalStatus() ? 1.0 : 0.0);
+            leftSignal.setOpacity(car.getLeftSignalStatus() ? 1.0 : 0.2);
         }
     }
 
@@ -161,15 +170,18 @@ public class ControllerImpl implements BaseController {
     public void changeRightSignal(boolean newStatus) {
         if (rightSignal != null && newStatus != car.getRightSignalStatus()) {
             car.setRightSignalStatus(car.getEngineStatus() && newStatus);
-            rightSignal.setOpacity(car.getRightSignalStatus() ? 1.0 : 0.0);
+            rightSignal.setOpacity(car.getRightSignalStatus() ? 1.0 : 0.2);
         }
     }
 
     @Override
     public void changeHeadLightSignal(boolean newStatus) {
-        if (headLight != null && newStatus != car.getHeadLightStatus()) {
+        if (headLight != null && lightButton != null && newStatus != car.getHeadLightStatus()) {
             car.setHeadLightStatus(car.getEngineStatus() && newStatus);
             headLight.setOpacity(car.getHeadLightStatus() ? 1.0 : 0.0);
+            lightButton.setImage(
+                    new Image(getClass().getResource("/resources/" +
+                            (car.getHeadLightStatus() ? "switch_off.png" : "switch_on.png")).toString()));
         }
     }
 

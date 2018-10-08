@@ -8,51 +8,62 @@
 
 <AnchorPane id="pane" prefHeight="580.0" prefWidth="1280.0" stylesheets="@style.css"
             xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="haitran.controllers.ControllerImpl">
+            fx:controller="haitran.controllers.Controller">
     <children>
         <Button id="engineButton" fx:id="engineButton" layoutX="1177.0" layoutY="477.0" maxHeight="96" maxWidth="96"
                 minHeight="96" minWidth="96" mnemonicParsing="false" onAction="#onChangeEngineStatus"
                 BorderPane.alignment="CENTER"/>
-        <ImageView fx:id="leftSignal" layoutX="482.0" layoutY="100.0" onMouseClicked="#onChangeLeftSignal" opacity="0.0"
+        <ImageView fx:id="leftSignal" layoutX="482.0" layoutY="100.0" onMouseClicked="#onChangeLeftSignal" opacity="0.2"
                    pickOnBounds="true" preserveRatio="true">
             <image>
                 <Image url="@leftSignal.png"/>
             </image>
         </ImageView>
         <ImageView fx:id="rightSignal" layoutX="789.0" layoutY="100.0" onMouseClicked="#onChangeRightSignal"
-                   opacity="0.0" pickOnBounds="true" preserveRatio="true">
+                   opacity="0.2" pickOnBounds="true" preserveRatio="true">
             <image>
                 <Image url="@rightSignal.png"/>
             </image>
         </ImageView>
-        <ImageView fx:id="headLight" fitHeight="127.0" fitWidth="276.0" layoutX="850.0" layoutY="78.0"
-                   onMouseClicked="#onChangeHeadLight" opacity="0.0" pickOnBounds="true" preserveRatio="true">
+        <ImageView fx:id="headLight" fitHeight="127.0" fitWidth="276.0" layoutX="850.0" layoutY="78.0" opacity="0.0"
+                   pickOnBounds="true" preserveRatio="true">
             <image>
                 <Image url="@Headlight.png"/>
             </image>
         </ImageView>
-        <ImageView fx:id="hood" layoutX="972.0" layoutY="228.0" pickOnBounds="true" preserveRatio="true"
-                   onMouseClicked="#onChangeHoodStatus">
+        <ImageView fx:id="hood" layoutX="972.0" layoutY="228.0" onMouseClicked="#onChangeHoodStatus" pickOnBounds="true"
+                   preserveRatio="true">
             <image>
                 <Image url="@lock_on.png"/>
             </image>
         </ImageView>
-        <ImageView fx:id="trunk" layoutX="972.0" layoutY="459.0" pickOnBounds="true" preserveRatio="true"
-                   onMouseClicked="#onChangeTrunkStatus">
+        <ImageView fx:id="trunk" layoutX="972.0" layoutY="459.0" onMouseClicked="#onChangeTrunkStatus"
+                   pickOnBounds="true" preserveRatio="true">
             <image>
                 <Image url="@lock_on.png"/>
             </image>
         </ImageView>
-        <ImageView fx:id="leftDoor" layoutX="872.0" layoutY="359.0" pickOnBounds="true" preserveRatio="true"
-                   onMouseClicked="#onChangeLeftDoorStatus">
+        <ImageView fx:id="leftDoor" layoutX="872.0" layoutY="359.0" onMouseClicked="#onChangeLeftDoorStatus"
+                   pickOnBounds="true" preserveRatio="true">
             <image>
                 <Image url="@lock_on.png"/>
             </image>
         </ImageView>
-        <ImageView fx:id="rightDoor" layoutX="1072.0" layoutY="359.0" pickOnBounds="true" preserveRatio="true"
-                   onMouseClicked="#onChangeRightDoorStatus">
+        <ImageView fx:id="rightDoor" layoutX="1072.0" layoutY="359.0" onMouseClicked="#onChangeRightDoorStatus"
+                   pickOnBounds="true" preserveRatio="true">
             <image>
                 <Image url="@lock_on.png"/>
+            </image>
+        </ImageView>
+        <ImageView fx:id="musicButton" layoutX="172.0" layoutY="342.0" pickOnBounds="true" preserveRatio="true">
+            <image>
+                <Image url="@switch_on.png"/>
+            </image>
+        </ImageView>
+        <ImageView fx:id="lightButton" layoutX="172.0" layoutY="386.0" onMouseClicked="#onChangeHeadLight"
+                   pickOnBounds="true" preserveRatio="true">
+            <image>
+                <Image url="@switch_on.png"/>
             </image>
         </ImageView>
     </children>
