@@ -24,17 +24,25 @@ public class Constants {
     // door service
     public static final String DOOR_SWITCH = "DoorSwitch";
     public static final String LEFT_DOOR = "LeftDoor";
-    public static final String RIGHT_DOOR = "RightDoor";
-    public static final String TRUNK = "Trunk";
-    public static final String HOOD = "Hood";
     public static final String GET_LEFT_DOOR = "GetLeftDoor";
     public static final String SET_LEFT_DOOR = "SetLeftDoor";
+    public static final String NEW_LEFT_DOOR_VALUE = "NewLeftDoorValue";
+    public static final String RETURN_LEFT_DOOR_VALUE = "ReturnLeftDoorValue";
+    public static final String RIGHT_DOOR = "RightDoor";
     public static final String GET_RIGHT_DOOR = "GetRightDoor";
     public static final String SET_RIGHT_DOOR = "SetRightDoor";
+    public static final String NEW_RIGHT_DOOR_VALUE = "NewRightDoorValue";
+    public static final String RETURN_RIGHT_DOOR_VALUE = "ReturnRightDoorValue";
+    public static final String HOOD = "Hood";
     public static final String GET_HOOD = "GetHood";
     public static final String SET_HOOD = "SetHood";
+    public static final String NEW_HOOD_VALUE = "NewHoodValue";
+    public static final String RETURN_HOOD_VALUE = "ReturnHoodValue";
+    public static final String TRUNK = "Trunk";
     public static final String GET_TRUNK = "GetTrunk";
     public static final String SET_TRUNK = "SetTrunk";
+    public static final String NEW_TRUNK_VALUE = "NewTrunkValue";
+    public static final String RETURN_TRUNK_VALUE = "ReturnTrunkValue";
 
     // light service
     public static final String LIGHT_SWITCH = "LightSwitch";

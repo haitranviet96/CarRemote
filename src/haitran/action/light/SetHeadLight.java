@@ -1,16 +1,16 @@
-package haitran.action;
+package haitran.action.light;
 
 import haitran.Constants;
 import org.fourthline.cling.model.action.ActionInvocation;
 import org.fourthline.cling.model.meta.Service;
 import org.fourthline.cling.model.types.InvalidValueException;
 
-public class SetRightSignal extends ActionInvocation {
-    public SetRightSignal(Service service, boolean status) {
-        super(service.getAction(Constants.SET_RIGHT_SIGNAL));
+public class SetHeadLight extends ActionInvocation {
+    public SetHeadLight(Service service, boolean status) {
+        super(service.getAction(Constants.SET_HEAD_LIGHT));
 
         try {
-            setInput(Constants.NEW_RIGHT_SIGNAL_VALUE, status);
+            setInput(Constants.NEW_HEAD_LIGHT_VALUE, status);
         } catch (InvalidValueException ex) {
             System.err.println(ex.getMessage());
             System.exit(1);
