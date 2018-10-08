@@ -1,7 +1,11 @@
 package haitran.controllers;
 
+import haitran.Car;
 import haitran.Constants;
 import haitran.action.SetEngineStatus;
+import haitran.action.callback.EngineSwitchSubscriptionCallback;
+import haitran.action.callback.DoorSwitchSubscriptionCallback;
+import haitran.action.callback.LightSwitchSubscriptionCallback;
 import haitran.action.door.SetHood;
 import haitran.action.door.SetLeftDoor;
 import haitran.action.door.SetRightDoor;
@@ -21,36 +25,20 @@ import org.fourthline.cling.UpnpServiceImpl;
 import org.fourthline.cling.binding.LocalServiceBindingException;
 import org.fourthline.cling.binding.annotations.AnnotationLocalServiceBinder;
 import org.fourthline.cling.controlpoint.ActionCallback;
-import org.fourthline.cling.controlpoint.SubscriptionCallback;
 import org.fourthline.cling.model.DefaultServiceManager;
 import org.fourthline.cling.model.ValidationException;
 import org.fourthline.cling.model.action.ActionInvocation;
-import org.fourthline.cling.model.gena.CancelReason;
-import org.fourthline.cling.model.gena.GENASubscription;
 import org.fourthline.cling.model.message.UpnpResponse;
 import org.fourthline.cling.model.message.header.UDADeviceTypeHeader;
 import org.fourthline.cling.model.meta.*;
-import org.fourthline.cling.model.state.StateVariableValue;
 import org.fourthline.cling.model.types.*;
 import org.fourthline.cling.registry.DefaultRegistryListener;
 import org.fourthline.cling.registry.Registry;
 import org.fourthline.cling.registry.RegistryListener;
 
 import java.io.IOException;
-import java.util.Map;
 
 public class ControllerImpl implements BaseController {
-    private static boolean ENGINE_STATUS = false;
-
-    private static boolean LEFT_SIGNAL_STATUS = false;
-    private static boolean RIGHT_SIGNAL_STATUS = false;
-    private static boolean HEAD_LIGHT_STATUS = false;
-
-    private static boolean LEFT_DOOR_STATUS = false;
-    private static boolean RIGHT_DOOR_STATUS = false;
-    private static boolean HOOD_STATUS = false;
-    private static boolean TRUNK_STATUS = false;
-
     @FXML
     private Button engineButton;
     @FXML
@@ -68,18 +56,24 @@ public class ControllerImpl implements BaseController {
     @FXML
     private ImageView hood;
 
-    private Device device;
+    private Car car = Car.getInstace();
     private UpnpService upnpService;
     private RegistryListener registryListener = new DefaultRegistryListener() {
         @Override
         public void localDeviceAdded(Registry registry, LocalDevice localDevice) {
-            System.out.println("Local device detected.");
+            System.out.println("Local car detected.");
             if (localDevice.getDetails().getModelDetails().getModelName().equals(Constants.MODEL_NAME)) {
                 System.out.println("Car system detected.");
-                device = localDevice;
-                upnpService.getControlPoint().execute(createEngineSwitchSubscriptionCallBack(getServiceById(device, Constants.ENGINE_SWITCH)));
-                upnpService.getControlPoint().execute(createLightSwitchSubscriptionCallBack(getServiceById(device, Constants.LIGHT_SWITCH)));
-                upnpService.getControlPoint().execute(createDoorSwitchSubscriptionCallBack(getServiceById(device, Constants.DOOR_SWITCH)));
+                car.setDevice(localDevice);
+                upnpService.getControlPoint().execute(
+                        new EngineSwitchSubscriptionCallback(getServiceById(car, Constants.ENGINE_SWITCH),
+                                Integer.MAX_VALUE, ControllerImpl.this));
+                upnpService.getControlPoint().execute(
+                        new LightSwitchSubscriptionCallback(getServiceById(car, Constants.LIGHT_SWITCH),
+                                Integer.MAX_VALUE, ControllerImpl.this));
+                upnpService.getControlPoint().execute(
+                        new DoorSwitchSubscriptionCallback(getServiceById(car, Constants.DOOR_SWITCH),
+                                Integer.MAX_VALUE, ControllerImpl.this));
             }
         }
 
@@ -87,7 +81,7 @@ public class ControllerImpl implements BaseController {
         public void localDeviceRemoved(Registry registry, LocalDevice localDevice) {
             if (localDevice.getDetails().getModelDetails().getModelName().equals(Constants.MODEL_NAME)) {
                 System.out.println("Car system removed.");
-                device = null;
+                car = null;
             }
         }
     };
@@ -100,12 +94,12 @@ public class ControllerImpl implements BaseController {
         // server and upnpService init
         upnpService = new UpnpServiceImpl();
 
-        // Add a listener for device registration events
+        // Add a listener for car registration events
         upnpService.getRegistry().addListener(registryListener);
 
         upnpService.getRegistry().addDevice(createDevice());
 
-        // Broadcast a search message for car remote device
+        // Broadcast a search message for car remote car
         UDADeviceTypeHeader header = new UDADeviceTypeHeader(new UDADeviceType(Constants.DEVICE_TYPE));
 
         upnpService.getControlPoint().search(header);
@@ -139,296 +133,156 @@ public class ControllerImpl implements BaseController {
         );
     }
 
-    // create subscription methods
-    private SubscriptionCallback createEngineSwitchSubscriptionCallBack(Service service) {
-        return new SubscriptionCallback(service, Integer.MAX_VALUE) {
-            @Override
-            protected void failed(GENASubscription genaSubscription, UpnpResponse upnpResponse, Exception e, String s) {
-                e.printStackTrace();
-            }
-
-            @Override
-            protected void established(GENASubscription genaSubscription) {
-                System.out.println("Established: " + genaSubscription.getSubscriptionId() + ".Engine switch subscription created.");
-//                onEngineStatusChange();
-            }
-
-            @Override
-            protected void ended(GENASubscription genaSubscription, CancelReason cancelReason, UpnpResponse upnpResponse) {
-
-            }
-
-            @Override
-            public void eventReceived(GENASubscription sub) {
-                System.out.println("Event: " + sub.getCurrentSequence().getValue());
-                Map<String, StateVariableValue> values = sub.getCurrentValues();
-
-                if (values.containsKey(Constants.STATUS)) {
-                    boolean value = (boolean) values.get(Constants.STATUS).getValue();
-                    changeEngineButton(value);
-                    System.out.println("New value: " + value);
-                }
-            }
-
-            @Override
-            public void eventsMissed(GENASubscription sub, int numberOfMissedEvents) {
-                System.out.println("Missed events: " + numberOfMissedEvents);
-            }
-        };
-    }
-
-    private SubscriptionCallback createLightSwitchSubscriptionCallBack(Service service) {
-        return new SubscriptionCallback(service, Integer.MAX_VALUE) {
-            @Override
-            protected void failed(GENASubscription genaSubscription, UpnpResponse upnpResponse, Exception e, String s) {
-                e.printStackTrace();
-            }
-
-            @Override
-            protected void established(GENASubscription genaSubscription) {
-                System.out.println("Established: " + genaSubscription.getSubscriptionId() + ".Light switch subscription created.");
-            }
-
-            @Override
-            protected void ended(GENASubscription genaSubscription, CancelReason cancelReason, UpnpResponse upnpResponse) {
-
-            }
-
-            @Override
-            public void eventReceived(GENASubscription sub) {
-                System.out.println("Event: " + sub.getCurrentSequence().getValue());
-                Map<String, StateVariableValue> values = sub.getCurrentValues();
-                for (String key : values.keySet()) {
-                    System.out.println(key + " changed.");
-                }
-                if (values.containsKey(Constants.LEFT_SIGNAL)) {
-                    boolean value = (boolean) values.get(Constants.LEFT_SIGNAL).getValue();
-                    changeLeftSignal(value);
-                    System.out.println("New value: " + LEFT_SIGNAL_STATUS);
-                }
-                if (values.containsKey(Constants.RIGHT_SIGNAL)) {
-                    boolean value = (boolean) values.get(Constants.RIGHT_SIGNAL).getValue();
-                    changeRightSignal(value);
-                    System.out.println("New value: " + RIGHT_SIGNAL_STATUS);
-                }
-                if (values.containsKey(Constants.HEAD_LIGHT)) {
-                    boolean value = (boolean) values.get(Constants.HEAD_LIGHT).getValue();
-                    changeHeadLightSignal(value);
-                    System.out.println("New value: " + HEAD_LIGHT_STATUS);
-                }
-            }
-
-            @Override
-            public void eventsMissed(GENASubscription sub, int numberOfMissedEvents) {
-                System.out.println("Missed events: " + numberOfMissedEvents);
-            }
-        };
-    }
-
-
-    private SubscriptionCallback createDoorSwitchSubscriptionCallBack(Service service) {
-        return new SubscriptionCallback(service, Integer.MAX_VALUE) {
-            @Override
-            protected void failed(GENASubscription genaSubscription, UpnpResponse upnpResponse, Exception e, String s) {
-                e.printStackTrace();
-            }
-
-            @Override
-            protected void established(GENASubscription genaSubscription) {
-                System.out.println("Established: " + genaSubscription.getSubscriptionId() + ".Door switch subscription created.");
-            }
-
-            @Override
-            protected void ended(GENASubscription genaSubscription, CancelReason cancelReason, UpnpResponse upnpResponse) {
-
-            }
-
-            @Override
-            public void eventReceived(GENASubscription sub) {
-                System.out.println("Event: " + sub.getCurrentSequence().getValue());
-                Map<String, StateVariableValue> values = sub.getCurrentValues();
-                for (String key : values.keySet()) {
-                    System.out.println(key + " changed.");
-                }
-                if (values.containsKey(Constants.LEFT_DOOR)) {
-                    boolean value = (boolean) values.get(Constants.LEFT_DOOR).getValue();
-                    changeLeftDoorStatus(value);
-                    System.out.println("New value: " + LEFT_DOOR_STATUS);
-                }
-                if (values.containsKey(Constants.RIGHT_DOOR)) {
-                    boolean value = (boolean) values.get(Constants.RIGHT_DOOR).getValue();
-                    changeRightDoorStatus(value);
-                    System.out.println("New value: " + RIGHT_DOOR_STATUS);
-                }
-                if (values.containsKey(Constants.HOOD)) {
-                    boolean value = (boolean) values.get(Constants.HOOD).getValue();
-                    changeHoodStatus(value);
-                    System.out.println("New value: " + HOOD_STATUS);
-                }
-                if (values.containsKey(Constants.TRUNK)) {
-                    boolean value = (boolean) values.get(Constants.TRUNK).getValue();
-                    changeTrunkStatus(value);
-                    System.out.println("New value: " + TRUNK_STATUS);
-                }
-            }
-
-            @Override
-            public void eventsMissed(GENASubscription sub, int numberOfMissedEvents) {
-                System.out.println("Missed events: " + numberOfMissedEvents);
-            }
-        };
-    }
-
     // change view methods
-    private void changeEngineButton(boolean newStatus) {
-        if (engineButton != null && newStatus != ENGINE_STATUS) {
+    @Override
+    public void changeEngineButton(boolean newStatus) {
+        if (engineButton != null && newStatus != car.getEngineStatus()) {
             if (!newStatus) {
-                if (LEFT_SIGNAL_STATUS) onChangeLeftSignal();
-                if (RIGHT_SIGNAL_STATUS) onChangeRightSignal();
-                if (HEAD_LIGHT_STATUS) onChangeHeadLight();
+                if (car.getLeftSignalStatus()) onChangeLeftSignal();
+                if (car.getRightSignalStatus()) onChangeRightSignal();
+                if (car.getHeadLightStatus()) onChangeHeadLight();
             }
-            ENGINE_STATUS = newStatus;
+            car.setEngineStatus(newStatus);
             engineButton.setStyle("-fx-background-image: url('" +
-                    (ENGINE_STATUS ? getClass().getResource("../../resources/stop.png").toExternalForm() :
+                    (car.getEngineStatus() ? getClass().getResource("../../resources/stop.png").toExternalForm() :
                             getClass().getResource("../../resources/start.png").toExternalForm()) + "')");
         }
     }
 
-    private void changeLeftSignal(boolean newStatus) {
-        if (leftSignal != null && newStatus != LEFT_SIGNAL_STATUS) {
-            LEFT_SIGNAL_STATUS = ENGINE_STATUS && newStatus;
-            leftSignal.setOpacity(LEFT_SIGNAL_STATUS ? 1.0 : 0.0);
+    @Override
+    public void changeLeftSignal(boolean newStatus) {
+        if (leftSignal != null && newStatus != car.getLeftSignalStatus()) {
+            car.setLeftSignalStatus(car.getEngineStatus() && newStatus);
+            leftSignal.setOpacity(car.getLeftSignalStatus() ? 1.0 : 0.0);
         }
     }
 
-    private void changeRightSignal(boolean newStatus) {
-        if (rightSignal != null && newStatus != RIGHT_SIGNAL_STATUS) {
-            RIGHT_SIGNAL_STATUS = ENGINE_STATUS && newStatus;
-            rightSignal.setOpacity(RIGHT_SIGNAL_STATUS ? 1.0 : 0.0);
+    @Override
+    public void changeRightSignal(boolean newStatus) {
+        if (rightSignal != null && newStatus != car.getRightSignalStatus()) {
+            car.setRightSignalStatus(car.getEngineStatus() && newStatus);
+            rightSignal.setOpacity(car.getRightSignalStatus() ? 1.0 : 0.0);
         }
     }
 
-    private void changeHeadLightSignal(boolean newStatus) {
-        if (headLight != null && newStatus != HEAD_LIGHT_STATUS) {
-            HEAD_LIGHT_STATUS = ENGINE_STATUS && newStatus;
-            headLight.setOpacity(HEAD_LIGHT_STATUS ? 1.0 : 0.0);
+    @Override
+    public void changeHeadLightSignal(boolean newStatus) {
+        if (headLight != null && newStatus != car.getHeadLightStatus()) {
+            car.setHeadLightStatus(car.getEngineStatus() && newStatus);
+            headLight.setOpacity(car.getHeadLightStatus() ? 1.0 : 0.0);
         }
     }
 
-    private void changeLeftDoorStatus(boolean newStatus) {
-        if (leftDoor != null && newStatus != LEFT_DOOR_STATUS) {
-            LEFT_DOOR_STATUS = newStatus;
+    @Override
+    public void changeLeftDoorStatus(boolean newStatus) {
+        if (leftDoor != null && newStatus != car.getLeftDoorStatus()) {
+            car.setLeftDoorStatus(newStatus);
             leftDoor.setImage(
                     new Image(getClass().getResource("/resources/" +
-                            (LEFT_DOOR_STATUS ? "lock_off.png" : "lock_on.png")).toString()));
+                            (car.getLeftDoorStatus() ? "lock_off.png" : "lock_on.png")).toString()));
         }
     }
 
-    private void changeRightDoorStatus(boolean newStatus) {
-        if (rightDoor != null && newStatus != RIGHT_DOOR_STATUS) {
-            RIGHT_DOOR_STATUS = newStatus;
+    @Override
+    public void changeRightDoorStatus(boolean newStatus) {
+        if (rightDoor != null && newStatus != car.getRightDoorStatus()) {
+            car.setRightDoorStatus(newStatus);
             rightDoor.setImage(
                     new Image(getClass().getResource("/resources/" +
-                            (RIGHT_DOOR_STATUS ? "lock_off.png" : "lock_on.png")).toString()));
+                            (car.getRightDoorStatus() ? "lock_off.png" : "lock_on.png")).toString()));
         }
     }
 
-    private void changeHoodStatus(boolean newStatus) {
-        if (hood != null && newStatus != HOOD_STATUS) {
-            HOOD_STATUS = newStatus;
+    @Override
+    public void changeHoodStatus(boolean newStatus) {
+        if (hood != null && newStatus != car.getHoodStatus()) {
+            car.setHoodStatus(newStatus);
             hood.setImage(
                     new Image(getClass().getResource("/resources/" +
-                            (HOOD_STATUS ? "lock_off.png" : "lock_on.png")).toString()));
+                            (car.getHoodStatus() ? "lock_off.png" : "lock_on.png")).toString()));
         }
     }
 
-    private void changeTrunkStatus(boolean newStatus) {
-        if (trunk != null && newStatus != TRUNK_STATUS) {
-            TRUNK_STATUS = newStatus;
+    @Override
+    public void changeTrunkStatus(boolean newStatus) {
+        if (trunk != null && newStatus != car.getTrunkStatus()) {
+            car.setTrunkStatus(newStatus);
             trunk.setImage(
                     new Image(getClass().getResource("/resources/" +
-                            (TRUNK_STATUS ? "lock_off.png" : "lock_on.png")).toString()));
+                            (car.getTrunkStatus() ? "lock_off.png" : "lock_on.png")).toString()));
         }
     }
 
     // controller method
-    @Override
     @FXML
     public void onChangeEngineStatus() {
-        Service service = getServiceById(device, Constants.ENGINE_SWITCH);
+        Service service = getServiceById(car, Constants.ENGINE_SWITCH);
         if (service != null) {
-            executeAction(upnpService, new SetEngineStatus(service, !ENGINE_STATUS));
+            executeAction(upnpService, new SetEngineStatus(service, !car.getEngineStatus()));
         }
     }
 
-    @Override
     @FXML
     public void onChangeLeftSignal() {
-        Service service = getServiceById(device, Constants.LIGHT_SWITCH);
+        Service service = getServiceById(car, Constants.LIGHT_SWITCH);
         if (service != null) {
-            executeAction(upnpService, new SetLeftSignal(service, !LEFT_SIGNAL_STATUS));
+            executeAction(upnpService, new SetLeftSignal(service, !car.getLeftSignalStatus()));
         }
     }
 
-    @Override
     @FXML
     public void onChangeRightSignal() {
-        Service service = getServiceById(device, Constants.LIGHT_SWITCH);
+        Service service = getServiceById(car, Constants.LIGHT_SWITCH);
         if (service != null) {
-            executeAction(upnpService, new SetRightSignal(service, !RIGHT_SIGNAL_STATUS));
+            executeAction(upnpService, new SetRightSignal(service, !car.getRightSignalStatus()));
         }
     }
 
-    @Override
     @FXML
     public void onChangeHeadLight() {
-        Service service = getServiceById(device, Constants.LIGHT_SWITCH);
+        Service service = getServiceById(car, Constants.LIGHT_SWITCH);
         if (service != null) {
-            executeAction(upnpService, new SetHeadLight(service, !HEAD_LIGHT_STATUS));
+            executeAction(upnpService, new SetHeadLight(service, !car.getHeadLightStatus()));
         }
     }
 
-    @Override
     @FXML
-    public void onChangeLeftDoorStatus(){
-        Service service = getServiceById(device, Constants.DOOR_SWITCH);
+    public void onChangeLeftDoorStatus() {
+        Service service = getServiceById(car, Constants.DOOR_SWITCH);
         if (service != null) {
-            executeAction(upnpService, new SetLeftDoor(service, !LEFT_DOOR_STATUS));
+            executeAction(upnpService, new SetLeftDoor(service, !car.getLeftDoorStatus()));
         }
     }
 
-    @Override
     @FXML
-    public void onChangeRightDoorStatus(){
-        Service service = getServiceById(device, Constants.DOOR_SWITCH);
+    public void onChangeRightDoorStatus() {
+        Service service = getServiceById(car, Constants.DOOR_SWITCH);
         if (service != null) {
-            executeAction(upnpService, new SetRightDoor(service, !RIGHT_DOOR_STATUS));
+            executeAction(upnpService, new SetRightDoor(service, !car.getRightDoorStatus()));
         }
     }
 
-    @Override
     @FXML
-    public void onChangeHoodStatus(){
-        Service service = getServiceById(device, Constants.DOOR_SWITCH);
+    public void onChangeHoodStatus() {
+        Service service = getServiceById(car, Constants.DOOR_SWITCH);
         if (service != null) {
-            executeAction(upnpService, new SetHood(service, !HOOD_STATUS));
+            executeAction(upnpService, new SetHood(service, !car.getHoodStatus()));
         }
     }
 
-    @Override
     @FXML
-    public void onChangeTrunkStatus(){
-        Service service = getServiceById(device, Constants.DOOR_SWITCH);
+    public void onChangeTrunkStatus() {
+        Service service = getServiceById(car, Constants.DOOR_SWITCH);
         if (service != null) {
-            executeAction(upnpService, new SetTrunk(service, !TRUNK_STATUS));
+            executeAction(upnpService, new SetTrunk(service, !car.getTrunkStatus()));
         }
     }
 
-    private Service getServiceById(Device device, String serviceId) {
-        if (device == null) {
+    private Service getServiceById(Car car, String serviceId) {
+        if (car == null) {
             return null;
         }
-        return device.findService(new UDAServiceId(serviceId));
+        return car.getDevice().findService(new UDAServiceId(serviceId));
     }
 
     protected void executeAction(UpnpService upnpService, ActionInvocation action) {

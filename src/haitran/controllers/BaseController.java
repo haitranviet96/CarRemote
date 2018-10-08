@@ -1,14 +1,14 @@
 package haitran.controllers;
 
 public interface BaseController {
-    void onChangeEngineStatus();
+    void changeEngineButton(boolean newStatus);
 
-    void onChangeLeftSignal();
-    void onChangeRightSignal();
-    void onChangeHeadLight();
+    void changeLeftSignal(boolean newStatus);
+    void changeRightSignal(boolean newStatus);
+    void changeHeadLightSignal(boolean newStatus);
 
-    void onChangeLeftDoorStatus();
-    void onChangeRightDoorStatus();
-    void onChangeHoodStatus();
-    void onChangeTrunkStatus();
+    void changeLeftDoorStatus(boolean newStatus);
+    void changeRightDoorStatus(boolean newStatus);
+    void changeHoodStatus(boolean newStatus);
+    void changeTrunkStatus(boolean newStatus);
 }
